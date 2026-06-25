@@ -1,0 +1,179 @@
+openapi: 3.1.0
+info:
+  title: Spotlight API
+  version: 1.0.0
+  description: >-
+    A small HTTP surface over the Spotlight engine — lint API artifacts, list the
+    built-in rulesets and supported formats, and validate a ruleset. Part of the
+    Spotlight governance suite; runs the same @spotlight-rules engine as the CLI,
+    VS Code extension, and browser validator.
+  contact:
+    name: API Commons
+    url: https://spotlight-rules.com
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local
+tags:
+  - name: Lint
+  - name: Rulesets
+  - name: Meta
+paths:
+  /lint:
+    post:
+      operationId: lintArtifact
+      summary: Lint an API artifact
+      description: Lint a YAML/JSON API artifact and return diagnostics, optionally with a chosen format or custom ruleset.
+      tags: [Lint]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LintRequest'
+      responses:
+        '200':
+          description: Lint results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LintResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/Error'
+  /rulesets:
+    get:
+      operationId: listRulesets
+      summary: List built-in rulesets
+      tags: [Rulesets]
+      responses:
+        '200':
+          description: The built-in rulesets and their rule names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rulesets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        alias: { type: string, example: 'spotlight:oas' }
+                        rules:
+                          type: array
+                          items: { type: string }
+  /rulesets/validate:
+    post:
+      operationId: validateRuleset
+      summary: Validate a ruleset
+      description: Structurally validate a ruleset (alias, definition object, or YAML/JSON string) against the Spotlight engine.
+      tags: [Rulesets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ruleset]
+              properties:
+                ruleset:
+                  description: A ruleset definition (object) or a YAML/JSON string.
+      responses:
+        '200':
+          description: Validation outcome
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+                  error: { type: string }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /formats:
+    get:
+      operationId: listFormats
+      summary: List supported artifact formats
+      tags: [Meta]
+      responses:
+        '200':
+          description: Supported formats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  formats:
+                    type: array
+                    items: { type: string }
+  /health:
+    get:
+      operationId: health
+      summary: Health check
+      tags: [Meta]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+components:
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+  schemas:
+    LintRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          description: The API artifact as a YAML or JSON string.
+        format:
+          type: string
+          description: Artifact format; selects the default ruleset when none is given.
+          enum: [openapi, asyncapi, arazzo, json-schema, apis-json, json-structure, json-ld, plans, rate-limits, finops, mcp]
+        ruleset:
+          description: A ruleset alias ("spotlight:oas"), or a ruleset definition object. Defaults to the built-in ruleset for the format.
+    LintResult:
+      type: object
+      properties:
+        total: { type: integer }
+        counts:
+          type: object
+          properties:
+            error: { type: integer }
+            warn: { type: integer }
+            info: { type: integer }
+            hint: { type: integer }
+        diagnostics:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+              message: { type: string }
+              severity: { type: string, enum: [error, warn, info, hint] }
+              path: { type: string }
+    ErrorBody:
+      type: object
+      properties:
+        error: { type: string }
+        detail: { type: string }
