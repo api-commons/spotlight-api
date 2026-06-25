@@ -1,0 +1,18 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm install
+      - run: npm run lint:self
+      - name: Smoke test the server
+        run: |
+          PORT=8123 node src/server.mjs &
+          for i in $(seq 1 20); do curl -sf http://localhost:8123/health && break; sleep 0.5; done
+          curl -sf -X POST http://localhost:8123/lint -H 'content-type: application/json' \
+            -d '{"format":"openapi","content":"openapi: \"3.0.3\"\ninfo: {title: T, version: \"1\"}\npaths: {}\n"}' | grep -q diagnostics
+          echo "smoke ok"
