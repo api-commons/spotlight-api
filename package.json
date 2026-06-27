@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node src/server.mjs",
     "dev": "node --watch src/server.mjs",
-    "lint:self": "node src/selfcheck.mjs"
+    "lint:self": "node src/selfcheck.mjs",
+    "check": "npm run lint:self"
   },
   "license": "Apache-2.0",
   "repository": "github:api-commons/spotlight-api",
