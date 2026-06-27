@@ -1,9 +1,11 @@
 {
   "name": "@spotlight-rules/spotlight-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A small OpenAPI-first HTTP API for Spotlight — lint API artifacts, list rules/rulesets, and validate rulesets over HTTP. Runs the @spotlight-rules engine.",
   "type": "module",
-  "bin": { "spotlight-api": "src/server.mjs" },
+  "bin": {
+    "spotlight-api": "src/server.mjs"
+  },
   "scripts": {
     "start": "node src/server.mjs",
     "dev": "node --watch src/server.mjs",
@@ -12,11 +14,11 @@
   "license": "Apache-2.0",
   "repository": "github:api-commons/spotlight-api",
   "dependencies": {
-    "@spotlight-rules/spotlight-core": "^1.0.0",
-    "@spotlight-rules/spotlight-formats": "^1.0.0",
-    "@spotlight-rules/spotlight-functions": "^1.0.0",
-    "@spotlight-rules/spotlight-parsers": "^1.0.0",
-    "@spotlight-rules/spotlight-rulesets": "^1.0.0",
+    "@spotlight-rules/spotlight-core": "^1.1.0",
+    "@spotlight-rules/spotlight-formats": "^1.1.0",
+    "@spotlight-rules/spotlight-functions": "^1.1.0",
+    "@spotlight-rules/spotlight-parsers": "^1.1.0",
+    "@spotlight-rules/spotlight-rulesets": "^1.1.0",
     "fastify": "^5.2.0",
     "yaml": "^2.6.1"
   }
